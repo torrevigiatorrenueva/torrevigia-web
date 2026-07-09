@@ -1,0 +1,13 @@
+{
+  "name": "torrevigia-web",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Web de Torrevigia, plataforma ciudadana por la transparencia y el buen gobierno en Torrenueva Costa.",
+  "scripts": {
+    "build": "eleventy",
+    "start": "eleventy --serve"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.1"
+  }
+}

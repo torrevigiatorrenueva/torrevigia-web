@@ -1,0 +1,9 @@
+<article class="comunicado-card">
+  <div class="comunicado-date"><span class="day">{{ comunicado.date | dia }}</span><span class="mes">{{ comunicado.date | mesAnio }}</span></div>
+  <div class="comunicado-body">
+    <span class="comunicado-tag">{{ comunicado.data.category }}</span>
+    <h3><a href="{{ comunicado.url }}">{{ comunicado.data.title }}</a></h3>
+    <p>{{ comunicado.data.summary }}</p>
+    <a href="{{ comunicado.url }}" class="news-link">Leer comunicado completo →</a>
+  </div>
+</article>

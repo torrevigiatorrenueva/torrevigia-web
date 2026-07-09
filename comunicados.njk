@@ -1,0 +1,24 @@
+---
+title: "Comunicados"
+description: "Comunicados oficiales de Torrevigia, la plataforma ciudadana por la transparencia y el buen gobierno en Torrenueva Costa."
+layout: base.njk
+permalink: "comunicados.html"
+---
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="/">Inicio</a> / Comunicados</div>
+    <span class="eyebrow">Actualidad</span>
+    <h1>Comunicados</h1>
+    <p>Declaraciones, alertas y notas informativas oficiales de Torrevigia sobre la actualidad municipal de Torrenueva Costa.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div id="listaComunicados">
+      {% for comunicado in collections.comunicados | reverse %}
+        {% include "comunicado-card.njk" %}
+      {% endfor %}
+    </div>
+  </div>
+</section>

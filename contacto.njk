@@ -1,0 +1,78 @@
+---
+title: "Contacto"
+description: "Ponte en contacto con Torrevigia, la plataforma ciudadana por la transparencia y el buen gobierno en Torrenueva Costa."
+layout: base.njk
+permalink: "contacto.html"
+---
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="/">Inicio</a> / Contacto</div>
+    <span class="eyebrow">Hablemos</span>
+    <h1>Contacto</h1>
+    <p>¿Tienes información, una denuncia o una propuesta relacionada con Torrenueva Costa? Escríbenos, cualquier aportación es bienvenida.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container join-inner">
+    <div>
+      <h2>Otras formas de contactar</h2>
+      <div class="contact-grid" style="grid-template-columns: 1fr;">
+        <div class="contact-item" style="text-align:left; display:flex; align-items:center; gap:16px;">
+          <div class="icon" style="margin:0; flex-shrink:0;">@</div>
+          <div>
+            <h3>Correo electrónico</h3>
+            <p>info@torrevigia.org</p>
+          </div>
+        </div>
+        <div class="contact-item" style="text-align:left; display:flex; align-items:center; gap:16px;">
+          <div class="icon" style="margin:0; flex-shrink:0;">IG</div>
+          <div>
+            <h3>Redes sociales</h3>
+            <p>@torrevigia · Instagram / X / Facebook</p>
+          </div>
+        </div>
+        <div class="contact-item" style="text-align:left; display:flex; align-items:center; gap:16px;">
+          <div class="icon" style="margin:0; flex-shrink:0;">📍</div>
+          <div>
+            <h3>Ámbito de actuación</h3>
+            <p>Torrenueva Costa, Granada</p>
+          </div>
+        </div>
+      </div>
+      <p class="form-note" style="margin-top:22px;">Si necesitas comunicarte de forma confidencial (por ejemplo, para aportar información sensible), indícalo en el mensaje y te responderemos por un canal privado.</p>
+    </div>
+
+    <form class="card-form" id="contactForm">
+      <h3 style="margin-top:0; color:var(--azul-oscuro);">Envíanos un mensaje</h3>
+      <div class="form-row">
+        <label for="c-nombre">Nombre y apellidos</label>
+        <input type="text" id="c-nombre" name="nombre" placeholder="Tu nombre completo" required>
+      </div>
+      <div class="form-row">
+        <label for="c-email">Correo electrónico</label>
+        <input type="email" id="c-email" name="email" placeholder="tucorreo@ejemplo.com" required>
+      </div>
+      <div class="form-row">
+        <label for="c-asunto">Asunto</label>
+        <select id="c-asunto" name="asunto">
+          <option>Consulta general</option>
+          <option>Aportar información pública</option>
+          <option>Denuncia o irregularidad</option>
+          <option>Propuesta de colaboración</option>
+          <option>Prensa y medios</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="c-mensaje">Mensaje</label>
+        <textarea id="c-mensaje" name="mensaje" rows="5" placeholder="Cuéntanos en qué podemos ayudarte" required></textarea>
+      </div>
+      <div class="form-row checkbox">
+        <input type="checkbox" id="c-privacidad" name="privacidad" required>
+        <label for="c-privacidad">He leído y acepto la política de privacidad y el tratamiento de mis datos por parte de Torrevigia.</label>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Enviar mensaje</button>
+      <p class="form-note">Este formulario es una maqueta: para recibir mensajes reales hay que conectarlo a un servicio de envío de correos (por ejemplo, Formspree) o a un backend propio.</p>
+    </form>
+  </div>
+</section>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% if title %}{{ title }} · {% endif %}TORREVIGIA - Plataforma Ciudadana por la Transparencia y el Buen Gobierno en Torrenueva Costa</title>
+<meta name="description" content="{{ description or 'Torrevigia es la plataforma ciudadana independiente que vigila, informa y exige transparencia y buen gobierno en Torrenueva Costa.' }}">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="/#inicio" class="brand"><img src="/img/logo.svg" alt="TORREVIGIA - Plataforma Ciudadana por la Transparencia y el Buen Gobierno en Torrenueva Costa" class="brand-logo-full"></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/descripcion.html">Descripción</a></li>
+      <li><a href="/comunicados.html" class="nav-cta">Comunicados</a></li>
+      <li><a href="/contacto.html">Contacto</a></li>
+    </ul>
+    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">&#9776;</button>
+  </nav>
+</header>
+
+{{ content | safe }}
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <h4>Torrevigia</h4>
+        <p style="font-size:0.88rem; max-width:340px;">Plataforma ciudadana independiente por la transparencia y el buen gobierno en Torrenueva Costa. Vigilamos, informamos y participamos.</p>
+      </div>
+      <div>
+        <h4>Navegación</h4>
+        <ul>
+          <li><a href="/descripcion.html">Descripción</a></li>
+          <li><a href="/comunicados.html">Comunicados</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Participa</h4>
+        <ul>
+          <li><a href="/contacto.html">Contacta con nosotros</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> TORREVIGIA - Plataforma Ciudadana por la Transparencia y el Buen Gobierno en Torrenueva Costa.</span>
+      <span>Sitio independiente, sin ánimo de lucro.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script>
+  if (window.netlifyIdentity) {
+    window.netlifyIdentity.on("init", (user) => {
+      if (!user) {
+        window.netlifyIdentity.on("login", () => {
+          document.location.href = "/admin/";
+        });
+      }
+    });
+  }
+</script>
+</body>
+</html>
