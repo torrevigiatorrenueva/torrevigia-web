@@ -23,4 +23,5 @@ collections:
         widget: "select"
         options: ["Transparencia", "Urbanismo", "Participación"]
       - { label: "Texto breve (miga de pan)", name: "breadcrumb", widget: "string" }
+      - { label: "Documento adjunto (PDF)", name: "documento", widget: "file", required: false }
       - { label: "Contenido", name: "body", widget: "markdown" }

@@ -59,7 +59,7 @@ h1, h2, h3 { font-family: "Georgia", "Times New Roman", serif; line-height: 1.25
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 24px;
+  padding: 8px 24px;
   max-width: var(--max-width);
   margin: 0 auto;
 }
@@ -130,9 +130,9 @@ h1, h2, h3 { font-family: "Georgia", "Times New Roman", serif; line-height: 1.25
 /* Hero */
 .hero {
   background: radial-gradient(circle at 20% 20%, rgba(168,220,190,0.4), transparent 45%),
-              linear-gradient(160deg, var(--azul-oscuro), var(--azul) 70%);
+              linear-gradient(160deg, var(--azul-oscuro), var(--azul) 72%);
   color: var(--blanco);
-  padding: 26px 0;
+  padding: 14px 0;
   position: relative;
   overflow: hidden;
 }
@@ -140,14 +140,14 @@ h1, h2, h3 { font-family: "Georgia", "Times New Roman", serif; line-height: 1.25
 .hero::after {
   content: "";
   position: absolute;
-  right: -100px;
-  bottom: -140px;
-  width: 420px;
-  height: 420px;
+  right: -120px;
+  bottom: -160px;
+  width: 480px;
+  height: 480px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(196,255,214,0.75), rgba(196,255,214,0) 70%);
-  filter: blur(28px);
-  animation: blobFloat1 8s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(196,255,214,0.7), rgba(196,255,214,0) 70%);
+  filter: blur(30px);
+  animation: blobFloat1 6.5s ease-in-out infinite;
   pointer-events: none;
 }
 
@@ -156,23 +156,29 @@ h1, h2, h3 { font-family: "Georgia", "Times New Roman", serif; line-height: 1.25
   position: absolute;
   left: -70px;
   top: -90px;
-  width: 280px;
-  height: 280px;
+  width: 340px;
+  height: 340px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.32), rgba(255,255,255,0) 70%);
-  filter: blur(24px);
-  animation: blobFloat2 10s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(255,255,255,0.35), rgba(255,255,255,0) 70%);
+  filter: blur(26px);
+  animation: blobFloat2 8s ease-in-out infinite;
   pointer-events: none;
 }
 
 @keyframes blobFloat1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-35px, -28px) scale(1.12); }
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  25%  { transform: translate(-70px, -46px) scale(1.22) rotate(9deg); }
+  50%  { transform: translate(-24px, -84px) scale(0.92) rotate(-7deg); }
+  75%  { transform: translate(44px, -34px) scale(1.16) rotate(5deg); }
+  100% { transform: translate(0, 0) scale(1) rotate(0deg); }
 }
 
 @keyframes blobFloat2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(30px, 24px) scale(1.15); }
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  25%  { transform: translate(58px, 46px) scale(1.2) rotate(-8deg); }
+  50%  { transform: translate(92px, 12px) scale(1.04) rotate(7deg); }
+  75%  { transform: translate(34px, 70px) scale(1.24) rotate(-5deg); }
+  100% { transform: translate(0, 0) scale(1) rotate(0deg); }
 }
 
 .sparkle {
@@ -218,18 +224,20 @@ h1, h2, h3 { font-family: "Georgia", "Times New Roman", serif; line-height: 1.25
 }
 
 .hero-logo-card {
-  background: var(--blanco);
-  border-radius: var(--radio);
-  padding: 22px 26px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 30px;
+  padding: 12px 12px;
   display: inline-block;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
-  margin-bottom: 30px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  margin-bottom: 0;
 }
 
 .hero-logo-card img {
   display: block;
   width: 100%;
-  max-width: 480px;
+  max-width: 360px;
   height: auto;
 }
 
@@ -280,9 +288,11 @@ h1, h2, h3 { font-family: "Georgia", "Times New Roman", serif; line-height: 1.25
 /* Sections */
 section { padding: 76px 0; }
 
+#comunicados, #contacto { padding: 40px 0 60px; }
+
 .section-head {
   max-width: 680px;
-  margin: 0 auto 44px;
+  margin: 0 auto 26px;
   text-align: center;
 }
 
@@ -604,19 +614,19 @@ footer.site-footer {
   background: var(--blanco);
   border-radius: var(--radio);
   box-shadow: var(--sombra);
-  padding: 26px 28px;
-  margin-bottom: 20px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
   display: flex;
-  gap: 22px;
+  gap: 18px;
   align-items: flex-start;
 }
 .comunicado-date {
   flex-shrink: 0;
-  width: 78px;
+  width: 72px;
   text-align: center;
   background: var(--arena);
   border-radius: 8px;
-  padding: 10px 6px;
+  padding: 8px 6px;
 }
 .comunicado-date .day { display: block; font-family: Georgia, serif; font-size: 1.5rem; color: var(--azul-oscuro); font-weight: 700; }
 .comunicado-date .mes { display: block; font-size: 0.72rem; text-transform: uppercase; color: var(--gris); letter-spacing: 0.05em; }
@@ -636,6 +646,7 @@ footer.site-footer {
 .comunicado-detail .content h2 { font-size: 1.2rem; margin: 30px 0 12px; }
 .back-link { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--azul); font-size: 0.9rem; margin-bottom: 26px; }
 .back-link:hover { color: var(--azul-oscuro); }
+.doc-download { margin: 26px 0; }
 .share-row { margin-top: 34px; padding-top: 24px; border-top: 1px solid #e4dfd3; font-size: 0.85rem; color: var(--gris); }
 
 /* Documentos - repositorio */
@@ -693,7 +704,7 @@ footer.site-footer {
   .menu-toggle { display: block; }
   .grid-3, .news-grid, .contact-grid, .org-grid, .values-grid, .grid-4 { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; }
-  .hero { padding: 60px 0 60px; }
+  .hero { padding: 18px 0; }
   .comunicado-card { flex-direction: column; }
   .comunicado-date { width: auto; display: inline-flex; gap: 6px; align-items: baseline; padding: 6px 14px; }
   .doc-item { flex-wrap: wrap; }

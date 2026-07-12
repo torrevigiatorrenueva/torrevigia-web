@@ -25,6 +25,10 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addFilter("limit", (arr, n) => (arr || []).slice(0, n));
 
+  eleventyConfig.addFilter("basename", (p) =>
+    decodeURIComponent((p || "").split("/").pop())
+  );
+
   return {
     dir: {
       input: ".",

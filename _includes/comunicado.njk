@@ -3,7 +3,7 @@ layout: base.njk
 ---
 <section class="page-hero">
   <div class="container">
-    <div class="breadcrumb"><a href="/">Inicio</a> / <a href="/comunicados.html">Comunicados</a> / {{ breadcrumb or title }}</div>
+    <div class="breadcrumb"><a href="/">Inicio</a> / <a href="/#comunicados">Comunicados</a> / {{ breadcrumb or title }}</div>
     <span class="eyebrow">Comunicado oficial</span>
     <h1>{{ title }}</h1>
   </div>
@@ -11,12 +11,15 @@ layout: base.njk
 
 <section>
   <div class="container comunicado-detail">
-    <a href="/comunicados.html" class="back-link">← Volver a comunicados</a>
+    <a href="/#comunicados" class="back-link">← Volver a comunicados</a>
     <span class="comunicado-tag">{{ category }}</span>
     <p class="meta-date">Publicado el {{ date | fechaLarga }}</p>
     <div class="content">
       {{ content | safe }}
     </div>
+    {% if documento %}
+    <p class="doc-download"><a href="{{ documento }}" class="btn btn-primary" target="_blank" rel="noopener">📄 Descargar {{ documento | basename }}</a></p>
+    {% endif %}
     <div class="share-row">¿Tienes información adicional sobre este asunto? <a href="/contacto.html">Escríbenos</a>.</div>
   </div>
 </section>
