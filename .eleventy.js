@@ -1,4 +1,7 @@
 module.exports = function (eleventyConfig) {
+  eleventyConfig.ignores.add("netlify");
+  eleventyConfig.ignores.add("Documentos");
+
   eleventyConfig.addPassthroughCopy("css");
   eleventyConfig.addPassthroughCopy("img");
   eleventyConfig.addPassthroughCopy("js");

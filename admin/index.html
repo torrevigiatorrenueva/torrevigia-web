@@ -1,23 +1,314 @@
 <!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Panel de gestión — Torrevigia</title>
-    <script defer src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  </head>
-  <body>
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    <script>
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", (user) => {
-          if (!user) {
-            window.netlifyIdentity.on("login", () => {
-              document.location.href = "/admin/";
-            });
-          }
-        });
-      }
-    </script>
-  </body>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Panel de comunicados · Torrevigía</title>
+<style>
+  :root { --verde:#2e6b4f; --verde2:#4f9a72; --arena:#f5f3ea; --gris:#55606b; --linea:#e2e0d6; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:#1f2933; background:var(--arena); line-height:1.5; }
+  header { background:var(--verde); color:#fff; padding:16px 22px; display:flex; align-items:center; justify-content:space-between; }
+  header h1 { margin:0; font-size:1.1rem; font-weight:700; }
+  header button { background:rgba(255,255,255,.15); }
+  main { max-width:820px; margin:0 auto; padding:24px 20px 60px; }
+  .card { background:#fff; border:1px solid var(--linea); border-radius:12px; padding:22px; margin-bottom:20px; box-shadow:0 8px 24px rgba(46,107,79,.06); }
+  h2 { margin:0 0 16px; font-size:1.15rem; color:var(--verde); }
+  label { display:block; font-weight:600; font-size:.86rem; margin:14px 0 6px; }
+  input, select, textarea { width:100%; padding:10px 12px; border:1px solid var(--linea); border-radius:8px; font:inherit; background:#fff; }
+  textarea { min-height:200px; resize:vertical; font-family:inherit; }
+  .hint { font-size:.78rem; color:var(--gris); margin:4px 0 0; }
+  button { cursor:pointer; border:none; border-radius:999px; padding:11px 20px; font:inherit; font-weight:700; color:#fff; background:var(--verde); }
+  button.secondary { background:#fff; color:var(--verde); border:1px solid var(--verde); }
+  button.danger { background:#b23b3b; }
+  button.link { background:none; color:var(--verde); padding:4px 8px; font-weight:600; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; }
+  .row > div { flex:1; min-width:180px; }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:22px; }
+  .item { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--linea); }
+  .item:last-child { border-bottom:none; }
+  .item .meta { font-size:.8rem; color:var(--gris); }
+  .item .item-actions { display:flex; gap:6px; flex-shrink:0; }
+  .msg { padding:11px 14px; border-radius:8px; margin-bottom:16px; font-size:.9rem; display:none; }
+  .msg.error { background:#fdecec; color:#a12; border:1px solid #f3c3c3; display:block; }
+  .msg.ok { background:#e9f6ee; color:#1f6b43; border:1px solid #b9e2c8; display:block; }
+  .hidden { display:none; }
+  .doc-actual { font-size:.82rem; color:var(--gris); margin-top:6px; }
+  .spinner { opacity:.6; pointer-events:none; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Torrevigía · Panel de comunicados</h1>
+  <button id="logoutBtn" class="hidden" onclick="logout()">Salir</button>
+</header>
+
+<main>
+  <!-- LOGIN -->
+  <section id="loginView" class="card" style="max-width:420px; margin:40px auto;">
+    <h2>Acceso</h2>
+    <div id="loginMsg" class="msg"></div>
+    <form id="loginForm">
+      <label for="u">Usuario</label>
+      <input type="text" id="u" autocomplete="username" required />
+      <label for="p">Contraseña</label>
+      <input type="password" id="p" autocomplete="current-password" required />
+      <div class="actions"><button type="submit">Entrar</button></div>
+    </form>
+  </section>
+
+  <!-- LISTA -->
+  <section id="listView" class="card hidden">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+      <h2 style="margin:0;">Comunicados</h2>
+      <button onclick="newComunicado()">+ Nuevo comunicado</button>
+    </div>
+    <div id="listMsg" class="msg"></div>
+    <div id="list" style="margin-top:14px;"></div>
+  </section>
+
+  <!-- FORMULARIO -->
+  <section id="formView" class="card hidden">
+    <h2 id="formTitle">Nuevo comunicado</h2>
+    <div id="formMsg" class="msg"></div>
+    <form id="comForm">
+      <input type="hidden" id="slug" />
+      <label for="title">Título *</label>
+      <input type="text" id="title" required />
+
+      <div class="row">
+        <div>
+          <label for="date">Fecha *</label>
+          <input type="date" id="date" required />
+        </div>
+        <div>
+          <label for="category">Categoría *</label>
+          <select id="category"></select>
+        </div>
+      </div>
+
+      <label for="summary">Resumen (texto de la tarjeta) *</label>
+      <textarea id="summary" style="min-height:70px;" required></textarea>
+
+      <label for="breadcrumb">Texto breve (miga de pan)</label>
+      <input type="text" id="breadcrumb" />
+      <p class="hint">Si lo dejas vacío se usa el título.</p>
+
+      <label for="description">Descripción SEO (opcional)</label>
+      <textarea id="description" style="min-height:60px;"></textarea>
+
+      <label for="body">Contenido</label>
+      <textarea id="body"></textarea>
+      <p class="hint">Se admite Markdown: <code>## Subtítulo</code>, <code>**negrita**</code>, <code>[enlace](/contacto.html)</code>.</p>
+
+      <label for="pdf">Documento adjunto (PDF)</label>
+      <input type="file" id="pdf" accept="application/pdf" />
+      <div id="docActual" class="doc-actual"></div>
+
+      <div class="actions">
+        <button type="submit" id="saveBtn">Guardar y publicar</button>
+        <button type="button" class="secondary" onclick="showList()">Cancelar</button>
+      </div>
+      <p class="hint" style="margin-top:14px;">Al guardar, el sitio se reconstruye solo en Netlify (puede tardar 1-2 minutos en verse publicado).</p>
+    </form>
+  </section>
+</main>
+
+<script>
+const API = "/.netlify/functions/comunicados";
+let CATEGORIES = ["Transparencia", "Urbanismo", "Participación"];
+
+function creds() {
+  return {
+    username: sessionStorage.getItem("tv_user") || "",
+    password: sessionStorage.getItem("tv_pass") || "",
+  };
+}
+function setMsg(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text || "";
+  el.className = "msg" + (type ? " " + type : "");
+}
+async function api(action, extra) {
+  const res = await fetch(API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(Object.assign({ action }, creds(), extra || {})),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || ("Error " + res.status));
+  return data;
+}
+
+function show(view) {
+  ["loginView", "listView", "formView"].forEach((v) =>
+    document.getElementById(v).classList.toggle("hidden", v !== view)
+  );
+  document.getElementById("logoutBtn").classList.toggle("hidden", view === "loginView");
+}
+function logout() {
+  sessionStorage.removeItem("tv_user");
+  sessionStorage.removeItem("tv_pass");
+  show("loginView");
+}
+
+// LOGIN
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  sessionStorage.setItem("tv_user", document.getElementById("u").value);
+  sessionStorage.setItem("tv_pass", document.getElementById("p").value);
+  setMsg("loginMsg", "Comprobando…", "");
+  try {
+    await loadList();
+    setMsg("loginMsg", "", "");
+    show("listView");
+  } catch (err) {
+    sessionStorage.removeItem("tv_pass");
+    setMsg("loginMsg", err.message, "error");
+  }
+});
+
+async function loadList() {
+  const data = await api("list");
+  if (data.categories) CATEGORIES = data.categories;
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  if (!data.comunicados.length) {
+    list.innerHTML = '<p class="meta">No hay comunicados todavía. Crea el primero con “+ Nuevo comunicado”.</p>';
+  }
+  for (const c of data.comunicados) {
+    const div = document.createElement("div");
+    div.className = "item";
+    const info = document.createElement("div");
+    info.innerHTML =
+      "<strong>" + escapeHtml(c.title) + "</strong>" +
+      '<div class="meta">' + (c.date || "") + (c.category ? " · " + escapeHtml(c.category) : "") + "</div>";
+    const acts = document.createElement("div");
+    acts.className = "item-actions";
+    const bE = document.createElement("button");
+    bE.className = "link"; bE.textContent = "Editar";
+    bE.onclick = () => editComunicado(c.slug);
+    const bD = document.createElement("button");
+    bD.className = "link"; bD.style.color = "#b23b3b"; bD.textContent = "Borrar";
+    bD.onclick = () => delComunicado(c.slug, c.title);
+    acts.append(bE, bD);
+    div.append(info, acts);
+    list.append(div);
+  }
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+}
+
+function fillCategories(sel) {
+  const s = document.getElementById("category");
+  s.innerHTML = "";
+  for (const c of CATEGORIES) {
+    const o = document.createElement("option");
+    o.value = c; o.textContent = c;
+    if (c === sel) o.selected = true;
+    s.append(o);
+  }
+}
+function showList() { setMsg("listMsg", "", ""); loadList().catch((e) => setMsg("listMsg", e.message, "error")); show("listView"); }
+
+function newComunicado() {
+  document.getElementById("comForm").reset();
+  document.getElementById("slug").value = "";
+  document.getElementById("formTitle").textContent = "Nuevo comunicado";
+  document.getElementById("date").value = new Date().toISOString().slice(0, 10);
+  document.getElementById("docActual").textContent = "";
+  document.getElementById("comForm").dataset.documento = "";
+  fillCategories();
+  setMsg("formMsg", "", "");
+  show("formView");
+}
+
+async function editComunicado(slug) {
+  setMsg("listMsg", "Cargando…", "");
+  try {
+    const d = await api("get", { slug });
+    document.getElementById("comForm").reset();
+    document.getElementById("slug").value = d.slug;
+    document.getElementById("formTitle").textContent = "Editar comunicado";
+    document.getElementById("title").value = d.data.title || "";
+    document.getElementById("date").value = (d.data.date || "").slice(0, 10);
+    document.getElementById("summary").value = d.data.summary || "";
+    document.getElementById("breadcrumb").value = d.data.breadcrumb || "";
+    document.getElementById("description").value = d.data.description || "";
+    document.getElementById("body").value = d.body || "";
+    fillCategories(d.data.category);
+    const doc = d.data.documento || "";
+    document.getElementById("comForm").dataset.documento = doc;
+    document.getElementById("docActual").textContent = doc ? "Documento actual: " + doc.split("/").pop() : "";
+    setMsg("listMsg", "", "");
+    setMsg("formMsg", "", "");
+    show("formView");
+  } catch (e) {
+    setMsg("listMsg", e.message, "error");
+  }
+}
+
+async function delComunicado(slug, title) {
+  if (!confirm('¿Eliminar el comunicado "' + title + '"? Esta acción no se puede deshacer.')) return;
+  setMsg("listMsg", "Eliminando…", "");
+  try {
+    await api("delete", { slug });
+    await loadList();
+    setMsg("listMsg", "Comunicado eliminado.", "ok");
+  } catch (e) {
+    setMsg("listMsg", e.message, "error");
+  }
+}
+
+function readFileB64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(",")[1]);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+document.getElementById("comForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("saveBtn");
+  btn.classList.add("spinner"); btn.textContent = "Guardando…";
+  setMsg("formMsg", "", "");
+  try {
+    const payload = {
+      slug: document.getElementById("slug").value || undefined,
+      title: document.getElementById("title").value.trim(),
+      date: document.getElementById("date").value,
+      category: document.getElementById("category").value,
+      summary: document.getElementById("summary").value.trim(),
+      breadcrumb: document.getElementById("breadcrumb").value.trim(),
+      description: document.getElementById("description").value.trim(),
+      body: document.getElementById("body").value,
+      documento: document.getElementById("comForm").dataset.documento || "",
+    };
+    const pdfFile = document.getElementById("pdf").files[0];
+    if (pdfFile) payload.pdf = await readFileB64(pdfFile);
+    await api("save", payload);
+    await loadList();
+    setMsg("listMsg", "Comunicado guardado. El sitio se está reconstruyendo en Netlify.", "ok");
+    show("listView");
+  } catch (err) {
+    setMsg("formMsg", err.message, "error");
+  } finally {
+    btn.classList.remove("spinner"); btn.textContent = "Guardar y publicar";
+  }
+});
+
+// Auto-login si hay credenciales guardadas en la pestaña
+(async function init() {
+  if (creds().password) {
+    try { await loadList(); show("listView"); return; } catch (_) {}
+  }
+  show("loginView");
+})();
+</script>
+</body>
 </html>
