@@ -4,3 +4,4 @@ _site/
 .claude/
 .env
 .netlify/
+deno.lock
