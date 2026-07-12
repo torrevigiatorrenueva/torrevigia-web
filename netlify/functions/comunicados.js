@@ -320,6 +320,21 @@ exports.handler = async (event) => {
       return json(200, { ok: true, changed });
     }
 
+    if (action === "clearOrder") {
+      const files = await storeListMd(COMUNICADOS_DIR);
+      let changed = 0;
+      for (const f of files) {
+        const stored = await storeRead(f.path);
+        if (!stored) continue;
+        const { data, body: mdBody } = parseMarkdown(stored.text);
+        if (data.orden === undefined || data.orden === null || data.orden === "") continue;
+        const md = toMarkdown({ ...data, orden: undefined, body: mdBody });
+        await storeWrite(f.path, Buffer.from(md, "utf8"), `Quitar orden manual: ${f.name}`, stored.sha);
+        changed++;
+      }
+      return json(200, { ok: true, changed });
+    }
+
     return json(400, { error: "Acción desconocida" });
   } catch (e) {
     return json(500, { error: e.message || String(e) });

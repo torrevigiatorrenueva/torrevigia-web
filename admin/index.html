@@ -66,9 +66,12 @@
 
   <!-- LISTA -->
   <section id="listView" class="card hidden">
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
       <h2 style="margin:0;">Comunicados</h2>
-      <button onclick="newComunicado()">+ Nuevo comunicado</button>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="secondary" onclick="clearOrderCmd()">Ordenar por fecha</button>
+        <button onclick="newComunicado()">+ Nuevo comunicado</button>
+      </div>
     </div>
     <div id="listMsg" class="msg"></div>
     <div id="list" style="margin-top:14px;"></div>
@@ -268,6 +271,18 @@ async function saveOrder() {
     await api("setOrder", { order: listData.map((c) => c.slug) });
     await loadList();
     setMsg("listMsg", "Orden guardado. El sitio se está reconstruyendo.", "ok");
+  } catch (e) {
+    setMsg("listMsg", e.message, "error");
+  }
+}
+
+async function clearOrderCmd() {
+  if (!confirm("¿Volver a ordenar por fecha (más reciente arriba)? Se quitará el orden manual.")) return;
+  setMsg("listMsg", "Aplicando orden por fecha…", "");
+  try {
+    await api("clearOrder");
+    await loadList();
+    setMsg("listMsg", "Ahora se ordena por fecha (más reciente arriba).", "ok");
   } catch (e) {
     setMsg("listMsg", e.message, "error");
   }
