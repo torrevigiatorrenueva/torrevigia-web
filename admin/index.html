@@ -12,7 +12,7 @@
   header { background:var(--verde); color:#fff; padding:16px 22px; display:flex; align-items:center; justify-content:space-between; }
   header h1 { margin:0; font-size:1.1rem; font-weight:700; }
   main { max-width:820px; margin:0 auto; padding:24px 20px 60px; }
-  .card { background:#fff; border:1px solid var(--linea); border-radius:12px; padding:22px; margin-bottom:20px; box-shadow:0 8px 24px rgba(46,107,79,.06); }
+  .card { background:#fff; border:1px solid var(--linea); border-radius:12px; padding:18px; margin-bottom:16px; box-shadow:0 8px 24px rgba(46,107,79,.06); }
   h2 { margin:0 0 16px; font-size:1.15rem; color:var(--verde); }
   label { display:block; font-weight:600; font-size:.86rem; margin:14px 0 6px; }
   input, select, textarea { width:100%; padding:10px 12px; border:1px solid var(--linea); border-radius:8px; font:inherit; background:#fff; }
@@ -25,7 +25,7 @@
   .row { display:flex; gap:12px; flex-wrap:wrap; }
   .row > div { flex:1; min-width:180px; }
   .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:22px; }
-  .item { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--linea); }
+  .item { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--linea); }
   .item:last-child { border-bottom:none; }
   .item .left { display:flex; align-items:center; gap:10px; }
   .item .meta { font-size:.8rem; color:var(--gris); }
@@ -45,6 +45,23 @@
   .msg.ok { background:#e9f6ee; color:#1f6b43; border:1px solid #b9e2c8; display:block; }
   .hidden { display:none; }
   .spinner { opacity:.6; pointer-events:none; }
+
+  @media (max-width: 560px) {
+    header { padding:12px 16px; }
+    header h1 { font-size:.98rem; }
+    main { padding:16px 12px 48px; }
+    .card { padding:15px; margin-bottom:12px; }
+    #loginView { margin:24px auto !important; }
+    .item { flex-direction:column; align-items:stretch; gap:8px; }
+    .item .left { align-items:flex-start; }
+    .item-actions { justify-content:flex-start; gap:4px; }
+    .item-actions button { padding:6px 10px; }
+    label { margin:12px 0 5px; }
+    textarea { min-height:170px; }
+    .row > div { min-width:0; }
+    button { padding:10px 16px; }
+    header button { padding:6px 12px; }
+  }
 </style>
 </head>
 <body>
