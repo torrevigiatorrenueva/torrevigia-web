@@ -11,7 +11,9 @@ permalink: "contacto.html"
     <div class="section-head">
       <h2>Contacto</h2>
     </div>
-    <form class="card-form" id="contactForm" style="max-width:640px; margin:0 auto;">
+    <form class="card-form" id="contactForm" name="contacto" method="POST" data-netlify="true" netlify-honeypot="bot-field" style="max-width:640px; margin:0 auto;">
+      <input type="hidden" name="form-name" value="contacto">
+      <p hidden><label>No rellenar si eres una persona: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
       <h3 style="margin-top:0; color:var(--azul-oscuro);">Envíanos un mensaje</h3>
       <div class="form-row">
         <label for="c-nombre">Nombre y apellidos</label>
@@ -40,7 +42,8 @@ permalink: "contacto.html"
         <label for="c-privacidad">He leído y acepto la política de privacidad y el tratamiento de mis datos por parte de Torrevigia.</label>
       </div>
       <button type="submit" class="btn btn-primary" style="width:100%;">Enviar mensaje</button>
-      <p class="form-note">Este formulario es una maqueta: para recibir mensajes reales hay que conectarlo a un servicio de envío de correos (por ejemplo, Formspree) o a un backend propio.</p>
+      <p id="contactStatus" role="status" style="margin-top:12px; font-weight:600; display:none;"></p>
+      <p class="form-note">Al enviar, recibiremos tu mensaje por correo electrónico. Tratamos tus datos conforme a nuestra política de privacidad.</p>
     </form>
   </div>
 </section>
