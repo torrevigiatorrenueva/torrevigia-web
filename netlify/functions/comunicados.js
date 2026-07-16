@@ -299,6 +299,7 @@ exports.handler = async (event) => {
       const result = [];
       for (const f of files) {
         const stored = await storeRead(f.path);
+        if (!stored) continue; // archivo recién borrado que el listado aún muestra
         const { data } = parseMarkdown(stored.text);
         result.push({
           slug: f.name.replace(/\.md$/, ""),
