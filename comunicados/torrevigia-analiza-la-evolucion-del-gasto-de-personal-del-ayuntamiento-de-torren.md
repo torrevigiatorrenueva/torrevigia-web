@@ -6,6 +6,7 @@ documentos:
   - "/img/comunicados/torrevigia-analiza-la-evolucion-del-gasto-de-personal-del-ayuntamiento-de-torren/presupuesto-2024.pdf"
   - "/img/comunicados/torrevigia-analiza-la-evolucion-del-gasto-de-personal-del-ayuntamiento-de-torren/presupuesto-2025.pdf"
   - "/img/comunicados/torrevigia-analiza-la-evolucion-del-gasto-de-personal-del-ayuntamiento-de-torren/presupuesto-2026.pdf"
+  - "/img/comunicados/torrevigia-analiza-la-evolucion-del-gasto-de-personal-del-ayuntamiento-de-torren/comunicado.pdf"
 ---
 La Plataforma Ciudadana TORREVIGÍA ha iniciado un análisis de la evolución de las cuentas públicas del Ayuntamiento de Torrenueva Costa utilizando exclusivamente la información contenida en los presupuestos municipales aprobados por la propia Corporación. 
 El objetivo de este trabajo es contribuir a una mayor transparencia en la gestión de los recursos públicos y ofrecer a los vecinos información objetiva sobre la evolución de las principales partidas presupuestarias.
