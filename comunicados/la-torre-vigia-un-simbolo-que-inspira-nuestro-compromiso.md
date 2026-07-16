@@ -2,7 +2,7 @@
 title: "La Torre vigía: un símbolo que inspira nuestro compromiso"
 fecha_inicio: "2026-07-16"
 documentos:
-  - "/img/comunicados/la-torre-vigia-un-simbolo-que-inspira-nuestro-compromiso/comunicado.pdf"
+  - "/img/comunicados/la-torre-vigia-un-simbolo-que-inspira-nuestro-compromiso/nuestra-inspiracion.pdf"
 ---
 La Torre vigía: un símbolo que inspira nuestro 
 compromiso 
