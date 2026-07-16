@@ -13,6 +13,7 @@ permalink: "contacto.html"
     </div>
     <form class="card-form" id="contactForm" name="contacto" method="POST" data-netlify="true" netlify-honeypot="bot-field" style="max-width:640px; margin:0 auto;">
       <input type="hidden" name="form-name" value="contacto">
+      <input type="hidden" name="fecha_hora" id="c-fecha-hora">
       <p hidden><label>No rellenar si eres una persona: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
       <h3 style="margin-top:0; color:var(--azul-oscuro);">Envíanos un mensaje</h3>
       <div class="form-row">
@@ -38,7 +39,7 @@ permalink: "contacto.html"
         <textarea id="c-mensaje" name="mensaje" rows="5" placeholder="Cuéntanos en qué podemos ayudarte" required></textarea>
       </div>
       <div class="form-row checkbox">
-        <input type="checkbox" id="c-privacidad" name="privacidad" required>
+        <input type="checkbox" id="c-privacidad" name="privacidad" value="Sí" required>
         <label for="c-privacidad">He leído y acepto la política de privacidad y el tratamiento de mis datos por parte de Torrevigia.</label>
       </div>
       <button type="submit" class="btn btn-primary" style="width:100%;">Enviar mensaje</button>

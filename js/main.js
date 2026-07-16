@@ -37,6 +37,12 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const btn = contactForm.querySelector("button[type=submit]");
       if (btn) { btn.disabled = true; btn.textContent = "Enviando…"; }
+      const fh = document.getElementById("c-fecha-hora");
+      if (fh) {
+        const n = new Date();
+        const p = (x) => String(x).padStart(2, "0");
+        fh.value = `${p(n.getDate())}/${p(n.getMonth() + 1)}/${n.getFullYear()} ${p(n.getHours())}:${p(n.getMinutes())}`;
+      }
       try {
         const res = await fetch("/", {
           method: "POST",
