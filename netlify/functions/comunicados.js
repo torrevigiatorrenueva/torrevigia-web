@@ -180,24 +180,27 @@ async function ghApi(method, apiPath, body) {
   if (!res.ok) await ghFail(`escribir en el repositorio (${method} ${apiPath})`, apiPath, res);
   return res.json();
 }
-// Escribe un archivo mediante blob + tree + commit (soporta archivos grandes).
-async function ghWriteLarge(p, buffer, message) {
+// UN commit para TODOS los cambios de una acción (crea/actualiza y borra),
+// vía Git Data API. Así Netlify hace UN SOLO build por acción (ahorra cuota),
+// y además soporta archivos grandes (la Contents API se limita a ~1 MB).
+async function ghCommit(changes, message) {
   const ref = await ghApi("GET", `/git/ref/heads/${BRANCH}`);
   const baseSha = ref.object.sha;
   const baseCommit = await ghApi("GET", `/git/commits/${baseSha}`);
-  const blob = await ghApi("POST", "/git/blobs", {
-    content: buffer.toString("base64"),
-    encoding: "base64",
-  });
-  const tree = await ghApi("POST", "/git/trees", {
-    base_tree: baseCommit.tree.sha,
-    tree: [{ path: p, mode: "100644", type: "blob", sha: blob.sha }],
-  });
-  const commit = await ghApi("POST", "/git/commits", {
-    message,
-    tree: tree.sha,
-    parents: [baseSha],
-  });
+  const tree = [];
+  for (const c of changes) {
+    if (c.delete) {
+      tree.push({ path: c.path, mode: "100644", type: "blob", sha: null });
+    } else {
+      const blob = await ghApi("POST", "/git/blobs", {
+        content: c.buffer.toString("base64"),
+        encoding: "base64",
+      });
+      tree.push({ path: c.path, mode: "100644", type: "blob", sha: blob.sha });
+    }
+  }
+  const newTree = await ghApi("POST", "/git/trees", { base_tree: baseCommit.tree.sha, tree });
+  const commit = await ghApi("POST", "/git/commits", { message, tree: newTree.sha, parents: [baseSha] });
   await ghApi("PATCH", `/git/refs/heads/${BRANCH}`, { sha: commit.sha });
 }
 
@@ -229,42 +232,31 @@ async function storeRead(p) {
   if (!f) return null;
   return { text: Buffer.from(f.content, "base64").toString("utf8"), sha: f.sha };
 }
-async function storeExists(p) {
-  if (USE_LOCAL) return fs.existsSync(path.join(ROOT, p)) ? "local" : null;
-  const f = await ghGetFile(p);
-  return f ? f.sha : null;
+/* ---------- Escritura por lotes (1 acción = 1 commit) ---------- */
+function newBatch() {
+  return [];
 }
-async function storeWrite(p, buffer, message, sha) {
-  if (USE_LOCAL) {
-    const abs = path.join(ROOT, p);
-    fs.mkdirSync(path.dirname(abs), { recursive: true });
-    fs.writeFileSync(abs, buffer);
-    return;
-  }
-  // Archivos > ~0.9 MB: la Contents API no los admite → Git Data API.
-  if (buffer.length > 900 * 1024) {
-    await ghWriteLarge(p, buffer, message);
-    return;
-  }
-  const payload = { message, content: buffer.toString("base64"), branch: BRANCH };
-  if (sha && sha !== "local") payload.sha = sha;
-  const res = await fetch(ghUrl(p), { method: "PUT", headers: ghHeaders(), body: JSON.stringify(payload) });
-  if (!res.ok) await ghFail(`guardar "${p}"`, p, res);
+function batchWrite(batch, p, buffer) {
+  batch.push({ path: p, buffer });
 }
-async function storeRemove(p, message) {
+function batchDelete(batch, p) {
+  batch.push({ path: p, delete: true });
+}
+async function commitBatch(batch, message) {
+  if (!batch.length) return;
   if (USE_LOCAL) {
-    const abs = path.join(ROOT, p);
-    if (fs.existsSync(abs)) fs.unlinkSync(abs);
+    for (const c of batch) {
+      const abs = path.join(ROOT, c.path);
+      if (c.delete) {
+        if (fs.existsSync(abs)) fs.unlinkSync(abs);
+      } else {
+        fs.mkdirSync(path.dirname(abs), { recursive: true });
+        fs.writeFileSync(abs, c.buffer);
+      }
+    }
     return;
   }
-  const f = await ghGetFile(p);
-  if (!f) return;
-  const res = await fetch(ghUrl(p), {
-    method: "DELETE",
-    headers: ghHeaders(),
-    body: JSON.stringify({ message, sha: f.sha, branch: BRANCH }),
-  });
-  if (!res.ok) await ghFail(`eliminar "${p}"`, p, res);
+  await ghCommit(batch, message);
 }
 
 // Valor de "orden" para colocar un comunicado nuevo arriba, si ya hay otros
@@ -375,21 +367,21 @@ exports.handler = async (event) => {
           error: "Los documentos adjuntos superan el máximo (~4 MB en total por envío). Comprime los PDF (por ejemplo en ilovepdf.com/compress) e inténtalo de nuevo.",
         });
       }
+      const batch = newBatch();
       const nuevasPaths = [];
       for (const f of nuevos) {
         if (!f || !f.data || !f.name) continue;
         const name = sanitizeName(f.name);
         const p = `${PDF_DIR}/${slug}/${name}`;
-        const sha = await storeExists(p);
-        await storeWrite(p, Buffer.from(f.data, "base64"), `Subir documento: ${name}`, sha);
+        batchWrite(batch, p, Buffer.from(f.data, "base64"));
         nuevasPaths.push(`/${p}`);
       }
       const documentos = [...kept, ...nuevasPaths];
-      // Borrar del almacenamiento los documentos que se han quitado
+      // Borrar (en el mismo commit) los documentos que se han quitado
       for (const d of prevDocs) {
         if (!documentos.includes(d)) {
           const dp = d.replace(/^\//, "");
-          if (dp.startsWith(PDF_DIR + "/")) await storeRemove(dp, `Eliminar documento: ${d}`);
+          if (dp.startsWith(PDF_DIR + "/")) batchDelete(batch, dp);
         }
       }
 
@@ -402,7 +394,8 @@ exports.handler = async (event) => {
         publicado: prev.publicado,
         body: body.body,
       });
-      await storeWrite(mdPath, Buffer.from(md, "utf8"), `${isEdit ? "Editar" : "Crear"} comunicado: ${slug}`, existing ? existing.sha : null);
+      batchWrite(batch, mdPath, Buffer.from(md, "utf8"));
+      await commitBatch(batch, `${isEdit ? "Editar" : "Crear"} comunicado: ${slug}`);
       return json(200, { ok: true, slug, documentos });
     }
 
@@ -419,12 +412,15 @@ exports.handler = async (event) => {
         publicado: isPub ? false : undefined,
         body: mdBody,
       });
-      await storeWrite(p, Buffer.from(md, "utf8"), `${isPub ? "Desactivar" : "Activar"} comunicado: ${slug}`, stored.sha);
+      const batch = newBatch();
+      batchWrite(batch, p, Buffer.from(md, "utf8"));
+      await commitBatch(batch, `${isPub ? "Desactivar" : "Activar"} comunicado: ${slug}`);
       return json(200, { ok: true, publicado: !isPub });
     }
 
     if (action === "setOrder") {
       const order = Array.isArray(body.order) ? body.order : [];
+      const batch = newBatch();
       let changed = 0;
       for (let i = 0; i < order.length; i++) {
         const slug = slugify(order[i]);
@@ -434,14 +430,16 @@ exports.handler = async (event) => {
         const { data, body: mdBody } = parseMarkdown(stored.text);
         if (String(data.orden) === String(i)) continue;
         const md = toMarkdown({ ...data, documentos: getDocs(data), orden: i, body: mdBody });
-        await storeWrite(p, Buffer.from(md, "utf8"), `Reordenar comunicado: ${slug}`, stored.sha);
+        batchWrite(batch, p, Buffer.from(md, "utf8"));
         changed++;
       }
+      await commitBatch(batch, "Reordenar comunicados");
       return json(200, { ok: true, changed });
     }
 
     if (action === "clearOrder") {
       const files = await storeListMd(COMUNICADOS_DIR);
+      const batch = newBatch();
       let changed = 0;
       for (const f of files) {
         const stored = await storeRead(f.path);
@@ -449,9 +447,10 @@ exports.handler = async (event) => {
         const { data, body: mdBody } = parseMarkdown(stored.text);
         if (data.orden === undefined || data.orden === null || data.orden === "") continue;
         const md = toMarkdown({ ...data, documentos: getDocs(data), orden: undefined, body: mdBody });
-        await storeWrite(f.path, Buffer.from(md, "utf8"), `Quitar orden manual: ${f.name}`, stored.sha);
+        batchWrite(batch, f.path, Buffer.from(md, "utf8"));
         changed++;
       }
+      await commitBatch(batch, "Quitar orden manual de los comunicados");
       return json(200, { ok: true, changed });
     }
 
@@ -461,12 +460,14 @@ exports.handler = async (event) => {
       const stored = await storeRead(mdPath);
       if (!stored) return json(404, { error: "Comunicado no encontrado" });
       const { data } = parseMarkdown(stored.text);
-      await storeRemove(mdPath, `Eliminar comunicado: ${slug}`);
-      // Borrar todos los documentos adjuntos del comunicado
+      const batch = newBatch();
+      batchDelete(batch, mdPath);
+      // Borrar todos los documentos adjuntos del comunicado (mismo commit)
       for (const d of getDocs(data)) {
         const dp = d.replace(/^\//, "");
-        if (dp.startsWith(PDF_DIR + "/")) await storeRemove(dp, `Eliminar documento: ${d}`);
+        if (dp.startsWith(PDF_DIR + "/")) batchDelete(batch, dp);
       }
+      await commitBatch(batch, `Eliminar comunicado: ${slug}`);
       return json(200, { ok: true });
     }
 
