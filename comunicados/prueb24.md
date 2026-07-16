@@ -5,6 +5,6 @@ fecha_fin: "2028-01-01"
 documentos:
   - "/img/comunicados/prueb24/menus.pdf"
   - "/img/comunicados/prueb24/instalacion-ipcop.pdf"
-orden: -1
+orden: 3
 ---
 Pruebaaaa
