@@ -152,6 +152,37 @@ async function ghGetFile(p) {
   if (!res.ok) throw new Error(`GitHub GET ${p}: ${res.status} ${await res.text()}`);
   return res.json();
 }
+// Llamada genérica a la Git Data API (para archivos grandes que la Contents
+// API no admite: su límite es ~1 MB por archivo).
+async function ghApi(method, apiPath, body) {
+  const res = await fetch(`${GH_API}/repos/${REPO}${apiPath}`, {
+    method,
+    headers: ghHeaders(),
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) throw new Error(`GitHub ${method} ${apiPath}: ${res.status} ${await res.text()}`);
+  return res.json();
+}
+// Escribe un archivo mediante blob + tree + commit (soporta archivos grandes).
+async function ghWriteLarge(p, buffer, message) {
+  const ref = await ghApi("GET", `/git/ref/heads/${BRANCH}`);
+  const baseSha = ref.object.sha;
+  const baseCommit = await ghApi("GET", `/git/commits/${baseSha}`);
+  const blob = await ghApi("POST", "/git/blobs", {
+    content: buffer.toString("base64"),
+    encoding: "base64",
+  });
+  const tree = await ghApi("POST", "/git/trees", {
+    base_tree: baseCommit.tree.sha,
+    tree: [{ path: p, mode: "100644", type: "blob", sha: blob.sha }],
+  });
+  const commit = await ghApi("POST", "/git/commits", {
+    message,
+    tree: tree.sha,
+    parents: [baseSha],
+  });
+  await ghApi("PATCH", `/git/refs/heads/${BRANCH}`, { sha: commit.sha });
+}
 
 /* ---------- Almacenamiento (local o GitHub) ---------- */
 async function storeListMd(dir) {
@@ -191,6 +222,11 @@ async function storeWrite(p, buffer, message, sha) {
     const abs = path.join(ROOT, p);
     fs.mkdirSync(path.dirname(abs), { recursive: true });
     fs.writeFileSync(abs, buffer);
+    return;
+  }
+  // Archivos > ~0.9 MB: la Contents API no los admite → Git Data API.
+  if (buffer.length > 900 * 1024) {
+    await ghWriteLarge(p, buffer, message);
     return;
   }
   const payload = { message, content: buffer.toString("base64"), branch: BRANCH };
@@ -315,6 +351,13 @@ exports.handler = async (event) => {
       const kept = Array.isArray(body.documentos) ? body.documentos.filter(Boolean) : [];
       // Subir documentos nuevos
       const nuevos = Array.isArray(body.nuevos) ? body.nuevos : [];
+      // Guardarraíl: Netlify limita la petición a ~6 MB. Cortamos antes con mensaje claro.
+      const totalB64 = nuevos.reduce((s, f) => s + ((f && f.data && f.data.length) || 0), 0);
+      if (totalB64 > 5.5 * 1024 * 1024) {
+        return json(413, {
+          error: "Los documentos adjuntos superan el máximo (~4 MB en total por envío). Comprime los PDF (por ejemplo en ilovepdf.com/compress) e inténtalo de nuevo.",
+        });
+      }
       const nuevasPaths = [];
       for (const f of nuevos) {
         if (!f || !f.data || !f.name) continue;

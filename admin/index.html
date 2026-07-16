@@ -128,7 +128,7 @@
       <label>Documentos adjuntos</label>
       <div id="docsList"></div>
       <input type="file" id="docs" accept="application/pdf,.pdf,.doc,.docx" multiple style="margin-top:8px;" />
-      <p class="hint">Puedes adjuntar varios. Se admiten PDF y documentos de texto.</p>
+      <p class="hint">Puedes adjuntar varios (PDF o documentos). <strong>Máximo ~4 MB en total por envío.</strong> Si un escaneo pesa más, comprímelo antes (p. ej. en ilovepdf.com/compress) o repártelo en varios comunicados.</p>
 
       <div class="actions">
         <button type="submit" id="saveBtn">Guardar y publicar</button>
@@ -364,12 +364,27 @@ function readFileB64(file) {
     r.readAsDataURL(file);
   });
 }
+const MAX_DOCS_BYTES = 4 * 1024 * 1024; // 4 MB en documentos nuevos por envío
 document.getElementById("docs").addEventListener("change", async (e) => {
+  let rechazado = null;
   for (const file of e.target.files) {
-    newFiles.push({ name: file.name, data: await readFileB64(file) });
+    const acumulado = newFiles.reduce((s, f) => s + (f.size || 0), 0);
+    if (file.size > MAX_DOCS_BYTES || acumulado + file.size > MAX_DOCS_BYTES) {
+      rechazado = file.name + " (" + (file.size / 1048576).toFixed(1) + " MB)";
+      continue;
+    }
+    newFiles.push({ name: file.name, data: await readFileB64(file), size: file.size });
   }
   e.target.value = "";
   renderDocs();
+  if (rechazado) {
+    setMsg("formMsg",
+      'El documento ' + rechazado + ' no se ha añadido: los documentos nuevos no pueden sumar más de 4 MB por envío. ' +
+      'Comprime el PDF (por ejemplo en ilovepdf.com/compress) o publícalo en otro comunicado.',
+      "error");
+  } else {
+    setMsg("formMsg", "", "");
+  }
 });
 
 // FORM: nuevo / editar
