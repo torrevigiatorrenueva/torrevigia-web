@@ -3,6 +3,7 @@ _site/
 .cache/
 .claude/
 .env
+netlify-variables.env
 .netlify/
 .netlify-dev.log
 deno.lock
