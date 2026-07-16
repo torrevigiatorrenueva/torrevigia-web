@@ -10,8 +10,12 @@ const fs = require("fs");
 const path = require("path");
 
 const GH_API = "https://api.github.com";
-const REPO = process.env.GITHUB_REPO;
-const BRANCH = process.env.GITHUB_BRANCH || "main";
+// .trim() por si el valor se pegó con un espacio o salto de línea de más al
+// configurar la variable en Netlify: un token o repo así de "sucio" provoca
+// peticiones HTTP mal formadas que GitHub rechaza con un 400 genérico.
+const REPO = (process.env.GITHUB_REPO || "").trim();
+const BRANCH = (process.env.GITHUB_BRANCH || "main").trim();
+const GITHUB_TOKEN = (process.env.GITHUB_TOKEN || "").trim();
 const COMUNICADOS_DIR = "comunicados";
 const PDF_DIR = "img/comunicados";
 
@@ -137,7 +141,7 @@ function parseMarkdown(text) {
 /* ---------- GitHub API ---------- */
 function ghHeaders() {
   return {
-    Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+    Authorization: `Bearer ${GITHUB_TOKEN}`,
     Accept: "application/vnd.github+json",
     "User-Agent": "torrevigia-admin",
     "X-GitHub-Api-Version": "2022-11-28",
@@ -146,10 +150,23 @@ function ghHeaders() {
 function ghUrl(p) {
   return `${GH_API}/repos/${REPO}/contents/${encodeURIComponent(p).replace(/%2F/g, "/")}`;
 }
+// Traduce un fallo de la API de GitHub a un mensaje entendible para quien
+// gestiona el panel (en vez del JSON crudo de GitHub).
+async function ghFail(accion, objetivo, res) {
+  const raw = await res.text().catch(() => "");
+  if (res.status === 401 || res.status === 403) {
+    throw new Error(
+      `El token de GitHub no tiene permiso para ${accion} (${res.status}). ` +
+      `Revisa en GitHub que el token tenga el permiso "Contents: Read and write" sobre el repositorio, ` +
+      `y que la variable GITHUB_TOKEN esté actualizada en Netlify (Site configuration → Environment variables).`
+    );
+  }
+  throw new Error(`Error de GitHub al ${accion} (${res.status}): ${raw}`);
+}
 async function ghGetFile(p) {
   const res = await fetch(`${ghUrl(p)}?ref=${BRANCH}`, { headers: ghHeaders() });
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`GitHub GET ${p}: ${res.status} ${await res.text()}`);
+  if (!res.ok) await ghFail(`leer "${p}"`, p, res);
   return res.json();
 }
 // Llamada genérica a la Git Data API (para archivos grandes que la Contents
@@ -160,7 +177,7 @@ async function ghApi(method, apiPath, body) {
     headers: ghHeaders(),
     body: body ? JSON.stringify(body) : undefined,
   });
-  if (!res.ok) throw new Error(`GitHub ${method} ${apiPath}: ${res.status} ${await res.text()}`);
+  if (!res.ok) await ghFail(`escribir en el repositorio (${method} ${apiPath})`, apiPath, res);
   return res.json();
 }
 // Escribe un archivo mediante blob + tree + commit (soporta archivos grandes).
@@ -196,7 +213,7 @@ async function storeListMd(dir) {
   }
   const res = await fetch(`${ghUrl(dir)}?ref=${BRANCH}`, { headers: ghHeaders() });
   if (res.status === 404) return [];
-  if (!res.ok) throw new Error(`GitHub LIST ${dir}: ${res.status} ${await res.text()}`);
+  if (!res.ok) await ghFail(`listar "${dir}"`, dir, res);
   const items = await res.json();
   return items
     .filter((i) => i.type === "file" && i.name.endsWith(".md"))
@@ -232,7 +249,7 @@ async function storeWrite(p, buffer, message, sha) {
   const payload = { message, content: buffer.toString("base64"), branch: BRANCH };
   if (sha && sha !== "local") payload.sha = sha;
   const res = await fetch(ghUrl(p), { method: "PUT", headers: ghHeaders(), body: JSON.stringify(payload) });
-  if (!res.ok) throw new Error(`GitHub PUT ${p}: ${res.status} ${await res.text()}`);
+  if (!res.ok) await ghFail(`guardar "${p}"`, p, res);
 }
 async function storeRemove(p, message) {
   if (USE_LOCAL) {
@@ -247,7 +264,7 @@ async function storeRemove(p, message) {
     headers: ghHeaders(),
     body: JSON.stringify({ message, sha: f.sha, branch: BRANCH }),
   });
-  if (!res.ok) throw new Error(`GitHub DELETE ${p}: ${res.status} ${await res.text()}`);
+  if (!res.ok) await ghFail(`eliminar "${p}"`, p, res);
 }
 
 // Valor de "orden" para colocar un comunicado nuevo arriba, si ya hay otros
@@ -279,7 +296,7 @@ exports.handler = async (event) => {
   }
 
   if (!checkAuth(body)) return json(401, { error: "Usuario o contraseña incorrectos" });
-  if (!USE_LOCAL && (!REPO || !process.env.GITHUB_TOKEN)) {
+  if (!USE_LOCAL && (!REPO || !GITHUB_TOKEN)) {
     return json(500, { error: "Falta configuración del servidor (GITHUB_REPO / GITHUB_TOKEN)" });
   }
 
