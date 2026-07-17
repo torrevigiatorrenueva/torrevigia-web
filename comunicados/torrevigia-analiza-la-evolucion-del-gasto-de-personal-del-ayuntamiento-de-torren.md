@@ -13,4 +13,6 @@ documentos:
   - "/img/comunicados/torrevigia-analiza-la-evolucion-del-gasto-de-personal-del-ayuntamiento-de-torren/presupuesto-2019.pdf"
   - "/img/comunicados/torrevigia-analiza-la-evolucion-del-gasto-de-personal-del-ayuntamiento-de-torren/presupuesto-2018.pdf"
 ---
-La Plataforma Ciudadana TORREVIGÍA ha iniciado un análisis de la evolución de las cuentas públicas del Ayuntamiento de Torrenueva Costa utilizando exclusivamente la información contenida en los presupuestos municipales aprobados por la propia Corporación.
+ORREVIGÍA analiza la evolución del gasto de personal del Ayuntamiento de Torrenueva Costa 
+La plataforma ciudadana TORREVIGÍA ha iniciado un análisis de los presupuestos municipales para estudiar la evolución del gasto de personal del Ayuntamiento de Torrenueva Costa. Según los datos oficiales, entre 2018 y 2025 el gasto de personal aumentó un 146,4 %, frente a un incremento del 85,5 % de los ingresos municipales. 
+La entidad explica que su objetivo es promover la transparencia y facilitar a los vecinos información objetiva sobre la gestión de los recursos públicos. Con motivo de la tramitación del Presupuesto de 2026, solicitará acceso al expediente completo para conocer la documentación que justifica esta evolución y, si procede, presentar las alegaciones previstas por la legislación.
